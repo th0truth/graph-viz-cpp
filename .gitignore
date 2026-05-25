@@ -68,5 +68,7 @@ Testing/
 .cache/
 
 # Generated graph visualizations
+output/
 *.dot
 *.png
+*.svg

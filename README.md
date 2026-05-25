@@ -22,6 +22,9 @@ A compact C++17 project for working with graph representations and classic graph
 - Prim minimum spanning tree
 - Dijkstra shortest paths
 - Graphviz `.dot` export for graph and tree visualization
+- Native SVG export with graph layout and edge-list panel
+- Optional PNG export when Graphviz is installed
+- ANSI terminal interface with framed command panels
 
 ## Project Structure
 
@@ -79,6 +82,7 @@ After creating a graph, choose an operation:
 
 ```text
 info
+viz
 dfs
 bfs
 topo
@@ -88,6 +92,8 @@ dijkstra
 all
 exit
 ```
+
+`viz` writes `output/graph.svg` and `output/graph.dot`. If Graphviz is installed, it also writes `output/graph.png`.
 
 ## Matrix Input
 
@@ -105,18 +111,22 @@ For undirected graphs, the program normalizes asymmetric input by using the uppe
 
 ## Visualization
 
-The application writes Graphviz `.dot` files for supported operations:
+The application writes visualization files for supported operations:
 
 ```text
-graph.dot
-kruskal.dot
-prim.dot
+output/graph.svg
+output/graph.dot
+output/graph.png
+output/kruskal.dot
+output/kruskal.svg
+output/prim.dot
+output/prim.svg
 ```
 
-Render a `.dot` file to PNG with Graphviz:
+`output/graph.svg` is generated directly by the application and contains a split view: graph drawing on the left and an edge-list panel on the right. Render a `.dot` file to PNG manually with Graphviz:
 
 ```bash
-dot -Tpng graph.dot -o graph.png
+dot -Tpng output/graph.dot -o output/graph.png
 ```
 
 ## License

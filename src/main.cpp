@@ -2,6 +2,51 @@
 #include "graph.h"
 #include "viz.h"
 
+const string RESET = "\033[0m";
+const string DIM = "\033[2m";
+const string BOLD = "\033[1m";
+const string ACCENT = "\033[38;5;208m";
+const string CYAN = "\033[38;5;81m";
+const string MUTED = "\033[38;5;245m";
+const string OUTPUT_DIR = "output";
+
+void ensureOutputDir()
+{
+  mkdir(OUTPUT_DIR.c_str(), 0755);
+}
+
+string outputPath(const string& filename)
+{
+  return OUTPUT_DIR + "/" + filename;
+}
+
+void clearScreen()
+{
+  cout << "\033[2J\033[H";
+}
+
+string visiblePad(const string& text, i32 width)
+{
+  i32 length = static_cast<i32>(text.size());
+
+  if (length >= width) {
+    return text.substr(0, width);
+  }
+
+  return text + string(width - length, ' ');
+}
+
+void printBox(const string& title, const vector<string>& lines, i32 width = 72)
+{
+  cout << ACCENT << "+-" << title << string(max(0, width - static_cast<i32>(title.size()) - 3), '-') << "+" << RESET << endl;
+
+  for (const string& line : lines) {
+    cout << ACCENT << "| " << RESET << visiblePad(line, width - 3) << ACCENT << "|" << RESET << endl;
+  }
+
+  cout << ACCENT << "+" << string(width - 2, '-') << "+" << RESET << endl;
+}
+
 i32 readInt(const string& prompt, i32 min_value, i32 max_value)
 {
   i32 value;
@@ -116,6 +161,78 @@ vector<vector<i32>> generateMatrix(bool directed)
   return matrix;
 }
 
+string graphKind(const Graph& graph)
+{
+  return string(graph.isDirected() ? "directed" : "undirected") + ", "
+       + string(graph.isWeighted() ? "weighted" : "unweighted");
+}
+
+vector<string> graphSummaryLines(const Graph& graph)
+{
+  vector<string> lines;
+
+  lines.push_back("Type: " + graphKind(graph));
+  lines.push_back("Vertices: " + to_string(graph.size()));
+  lines.push_back("Edges: " + to_string(graph.edgeCount()));
+  lines.push_back("Loops: " + string(graph.hasLoops() ? "yes" : "no"));
+  lines.push_back("Output folder: output/");
+  lines.push_back("Exports: graph.svg, graph.dot, graph.png when Graphviz is installed");
+
+  return lines;
+}
+
+vector<string> matrixLines(const Graph& graph)
+{
+  vector<string> lines;
+  const vector<vector<i32>>& matrix = graph.getMatrix();
+
+  for (const auto& row : matrix) {
+    ostringstream out;
+
+    for (i32 value : row) {
+      out << setw(4) << value;
+    }
+
+    lines.push_back(out.str());
+  }
+
+  return lines;
+}
+
+vector<string> edgeListLines(const Graph& graph, i32 max_lines = 14)
+{
+  vector<string> lines;
+  vector<Edge> edges = graph.edges();
+
+  if (edges.empty()) {
+    lines.push_back("No edges.");
+    return lines;
+  }
+
+  for (i32 i = 0; i < static_cast<i32>(edges.size()) && i < max_lines; i++) {
+    const Edge& edge = edges[i];
+    ostringstream out;
+
+    out << "(" << edge.from + 1 << ", " << edge.to + 1 << ")";
+
+    if (!graph.isDirected()) {
+      out << ", (" << edge.to + 1 << ", " << edge.from + 1 << ")";
+    }
+
+    if (graph.isWeighted()) {
+      out << "  w=" << edge.weight;
+    }
+
+    lines.push_back(out.str());
+  }
+
+  if (static_cast<i32>(edges.size()) > max_lines) {
+    lines.push_back("...");
+  }
+
+  return lines;
+}
+
 string normalizeCommand(string command)
 {
   for (char& ch : command) {
@@ -150,10 +267,16 @@ void printEdges(const vector<Edge>& edges)
 
 void showGraphInfo(const Graph& graph)
 {
-  cout << endl << "Graph representation" << endl;
-  graph.printMatrix();
-  graph.printInfo();
-  GraphViz::writeDot(graph, "graph.dot");
+  clearScreen();
+  printBox("Graph Algorithm Visualizer", graphSummaryLines(graph));
+  cout << endl;
+  printBox("Adjacency Matrix", matrixLines(graph));
+  cout << endl;
+  printBox("Edge List", edgeListLines(graph));
+
+  ensureOutputDir();
+  GraphViz::writeDot(graph, outputPath("graph.dot"));
+  GraphViz::writeSvg(graph, outputPath("graph.svg"));
 }
 
 void runDFS(const Graph& graph)
@@ -206,7 +329,9 @@ void runKruskal(const Graph& graph)
   vector<Edge> mst = graph::Kruskal(graph, total_weight);
   printEdges(mst);
   cout << "Total: " << total_weight << endl;
-  GraphViz::writeDot(graph, "kruskal.dot", mst);
+  ensureOutputDir();
+  GraphViz::writeDot(graph, outputPath("kruskal.dot"), mst);
+  GraphViz::writeSvg(graph, outputPath("kruskal.svg"), mst);
 }
 
 void runPrim(const Graph& graph)
@@ -222,7 +347,9 @@ void runPrim(const Graph& graph)
   vector<Edge> mst = graph::Prim(graph, total_weight);
   printEdges(mst);
   cout << "Total: " << total_weight << endl;
-  GraphViz::writeDot(graph, "prim.dot", mst);
+  ensureOutputDir();
+  GraphViz::writeDot(graph, outputPath("prim.dot"), mst);
+  GraphViz::writeSvg(graph, outputPath("prim.svg"), mst);
 }
 
 void runDijkstra(const Graph& graph)
@@ -245,6 +372,30 @@ void runDijkstra(const Graph& graph)
   }
 }
 
+void exportVisualization(const Graph& graph)
+{
+  ensureOutputDir();
+  GraphViz::writeDot(graph, outputPath("graph.dot"));
+  GraphViz::writeSvg(graph, outputPath("graph.svg"));
+  i32 png_status = system("dot -Tpng output/graph.dot -o output/graph.png >/dev/null 2>&1");
+
+  cout << endl;
+  vector<string> lines = {
+    "Wrote output/graph.svg",
+    "Wrote output/graph.dot",
+    "Open output/graph.svg in a browser for the cleanest built-in visualization."
+  };
+
+  if (png_status == 0) {
+    lines.push_back("Wrote output/graph.png using Graphviz.");
+  } else {
+    lines.push_back("PNG was skipped because Graphviz dot is not available.");
+    lines.push_back("Install Graphviz and run: dot -Tpng output/graph.dot -o output/graph.png");
+  }
+
+  printBox("Visualization Export", lines);
+}
+
 void runAll(const Graph& graph)
 {
   showGraphInfo(graph);
@@ -259,31 +410,38 @@ void runAll(const Graph& graph)
 void printOperationMenu()
 {
   cout << endl;
-  cout << "Available operations:" << endl;
-  cout << "  info      - print matrix and graph properties" << endl;
-  cout << "  dfs       - depth-first search" << endl;
-  cout << "  bfs       - breadth-first search" << endl;
-  cout << "  topo      - topological sort" << endl;
-  cout << "  kruskal   - minimum spanning tree by Kruskal" << endl;
-  cout << "  prim      - minimum spanning tree by Prim" << endl;
-  cout << "  dijkstra  - shortest paths by Dijkstra" << endl;
-  cout << "  all       - run every operation" << endl;
-  cout << "  exit      - quit" << endl;
+  printBox("Commands", {
+    "info      print graph properties, matrix, and edge list",
+    "viz       export output/graph.svg and output/graph.dot",
+    "dfs       depth-first search",
+    "bfs       breadth-first search",
+    "topo      topological sort",
+    "kruskal   minimum spanning tree by Kruskal",
+    "prim      minimum spanning tree by Prim",
+    "dijkstra  shortest paths by Dijkstra",
+    "all       run every operation",
+    "exit      quit"
+  });
 }
 
 void runInteractiveShell(const Graph& graph)
 {
   string command;
 
+  clearScreen();
+  printBox("Graph Algorithm Visualizer", graphSummaryLines(graph));
+
   while (true) {
     printOperationMenu();
-    cout << "Operation: ";
+    cout << ACCENT << "Operation" << RESET << " > ";
     cin >> command;
 
     command = normalizeCommand(command);
 
     if (command == "info") {
       showGraphInfo(graph);
+    } else if (command == "viz" || command == "visualize" || command == "export") {
+      exportVisualization(graph);
     } else if (command == "dfs") {
       runDFS(graph);
     } else if (command == "bfs") {
@@ -301,17 +459,19 @@ void runInteractiveShell(const Graph& graph)
     } else if (command == "exit" || command == "quit") {
       break;
     } else {
-      cout << "Unknown operation. Try: info, dfs, bfs, topo, kruskal, prim, dijkstra, all, exit." << endl;
+      cout << "Unknown operation. Try: info, viz, dfs, bfs, topo, kruskal, prim, dijkstra, all, exit." << endl;
     }
   }
 }
 
 int main()
 {
-  cout << "Graph Algorithm Visualizer" << endl;
-  cout << "1 - Use sample matrix" << endl;
-  cout << "2 - Enter matrix manually" << endl;
-  cout << "3 - Generate random matrix" << endl;
+  clearScreen();
+  printBox("Graph Algorithm Visualizer", {
+    "1  Use sample matrix",
+    "2  Enter matrix manually",
+    "3  Generate random matrix"
+  });
 
   i32 choice = readInt("Choose input mode: ", 1, 3);
   bool directed = false;
@@ -332,7 +492,7 @@ int main()
   Graph graph(matrix, directed);
   runInteractiveShell(graph);
 
-  cout << endl << "DOT files were written to the current directory." << endl;
+  cout << endl << "Visualization files were written to output/ when requested." << endl;
 
   return 0;
 }
