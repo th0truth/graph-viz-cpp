@@ -99,17 +99,21 @@ exit
 
 For manual input, enter the number of vertices and then each matrix cell. Use `0` when no edge exists.
 
-Example for an undirected weighted graph with three vertices:
+Example for an undirected weighted graph with five vertices:
 
 ```text
-0 1 4
-1 0 2
-4 2 0
+ 0  9 75  0  0
+ 9  0 95 19 42
+75 95  0 51 66
+ 0 19 51  0 31
+ 0 42 66 31  0
 ```
 
 For undirected graphs, the program normalizes asymmetric input by using the upper-triangle value for each pair.
 
 ## Visualization
+
+![GRAPH-VIZ-CPP example](.github/assets/graph-viz-cpp-example.svg)
 
 The application writes visualization files for supported operations:
 

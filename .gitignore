@@ -72,3 +72,6 @@ output/
 *.dot
 *.png
 *.svg
+!.github/
+!.github/assets/
+!.github/assets/*.svg
