@@ -2,10 +2,14 @@
 
 #include <iostream>
 #include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <climits>
+#include <cstdint>
 #include <fstream>
+#include <functional>
 #include <queue>
+#include <random>
 #include <set>
 #include <string>
 #include <vector>

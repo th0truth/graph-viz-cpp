@@ -39,6 +39,11 @@ namespace graph {
   vector<i32> DFS(const Graph& graph, i32 start, bool visualize)
   {
     vector<i32> order;
+
+    if (!graph.isValidVertex(start)) {
+      return order;
+    }
+
     vector<bool> used(graph.size(), false);
     function<void(i32)> dfs = [&](i32 v) {
       used[v] = true;
@@ -54,6 +59,11 @@ namespace graph {
   vector<i32> BFS(const Graph& graph, i32 start, bool visualize)
   {
     vector<i32> order;
+
+    if (!graph.isValidVertex(start)) {
+      return order;
+    }
+
     vector<bool> used(graph.size(), false);
     queue<i32> q;
     used[start] = true;
@@ -91,6 +101,7 @@ namespace graph {
     };
     for (i32 i = 0; i < graph.size(); i++) {
       if (color[i] == 0) dfs(i);
+      if (!ok) break;
     }
     reverse(order.begin(), order.end());
     return order;
@@ -123,6 +134,12 @@ namespace graph {
     vector<i32> parent(n, -1);
     vector<bool> used(n, false);
     vector<Edge> mst;
+
+    if (n == 0) {
+      total_weight = 0;
+      return mst;
+    }
+
     key[0] = 0;
     total_weight = 0;
   
@@ -158,6 +175,11 @@ namespace graph {
     vector<i32> dist(n, INT_MAX);
     vector<bool> used(n, false);
     parent.assign(n, -1);
+
+    if (!graph.isValidVertex(start)) {
+      return dist;
+    }
+
     dist[start] = 0;
  
     for (i32 step = 0; step < n; step++) {

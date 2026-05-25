@@ -24,7 +24,8 @@ class Graph
     i32 edgeCount() const;
 
     vector<Edge> edges() const;
-    vector<i32> neighbors(i32 vector) const;
+    bool isValidVertex(i32 vertex) const;
+    vector<i32> neighbors(i32 vertex) const;
     const vector<vector<i32>>& getMatrix() const;
 
     void printMatrix() const;

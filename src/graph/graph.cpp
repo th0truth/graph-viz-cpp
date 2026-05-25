@@ -5,7 +5,7 @@ Graph::Graph(vector<vector<i32>> new_matrix, bool is_directed)
 
 i32 Graph::size() const
 {
-  return matrix.size();
+  return static_cast<i32>(matrix.size());
 }
 
 bool Graph::isDirected() const
@@ -63,9 +63,18 @@ vector<Edge> Graph::edges() const
   return result;
 }
 
+bool Graph::isValidVertex(i32 vertex) const
+{
+  return vertex >= 0 && vertex < size();
+}
+
 vector<i32> Graph::neighbors(i32 vertex) const
 {
   vector<i32> result;
+
+  if (!isValidVertex(vertex)) {
+    return result;
+  }
 
   for (i32 i = 0; i < size(); i++) {
     if (matrix[vertex][i] != 0)
