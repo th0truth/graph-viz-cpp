@@ -112,7 +112,7 @@ vector<vector<i32>> readMatrix(bool directed)
 
   for (i32 i = 0; i < n; i++) {
     for (i32 j = 0; j < n; j++) {
-      matrix[i][j] = readInt("matrix[" + to_string(i + 1) + "][" + to_string(j + 1) + "]: ", 0, 1000000);
+      matrix[i][j] = readInt("matrix[" + to_string(i + 1) + "][" + to_string(j + 1) + "]: ", -1000000, 1000000);
     }
   }
 
@@ -372,6 +372,33 @@ void runDijkstra(const Graph& graph)
   }
 }
 
+void runBellmanFord(const Graph& graph)
+{
+  i32 start = readStartVertex(graph, "Bellman-Ford");
+
+  cout << endl << "Bellman-Ford shortest paths" << endl;
+
+  vector<i32> parent;
+  bool has_negative_cycle = false;
+  vector<i32> dist = graph::BellmanFord(graph, start, parent, has_negative_cycle);
+
+  if (has_negative_cycle) {
+    cout << "Graph contains a negative-weight cycle reachable from vertex "
+         << start + 1 << ". Shortest paths are undefined." << endl;
+    return;
+  }
+
+  for (i32 i = 0; i < static_cast<i32>(dist.size()); i++) {
+    cout << start + 1 << " -> " << i + 1 << " = ";
+
+    if (dist[i] == INT_MAX) {
+      cout << "INF" << endl;
+    } else {
+      cout << dist[i] << endl;
+    }
+  }
+}
+
 void exportVisualization(const Graph& graph)
 {
   ensureOutputDir();
@@ -405,6 +432,7 @@ void runAll(const Graph& graph)
   runKruskal(graph);
   runPrim(graph);
   runDijkstra(graph);
+  runBellmanFord(graph);
 }
 
 void printOperationMenu()
@@ -419,6 +447,7 @@ void printOperationMenu()
     "kruskal   minimum spanning tree by Kruskal",
     "prim      minimum spanning tree by Prim",
     "dijkstra  shortest paths by Dijkstra",
+    "bellman   shortest paths by Bellman-Ford",
     "all       run every operation",
     "exit      quit"
   });
@@ -454,12 +483,14 @@ void runInteractiveShell(const Graph& graph)
       runPrim(graph);
     } else if (command == "dijkstra") {
       runDijkstra(graph);
+    } else if (command == "bellman" || command == "bellman-ford" || command == "bf") {
+      runBellmanFord(graph);
     } else if (command == "all") {
       runAll(graph);
     } else if (command == "exit" || command == "quit") {
       break;
     } else {
-      cout << "Unknown operation. Try: info, viz, dfs, bfs, topo, kruskal, prim, dijkstra, all, exit." << endl;
+      cout << "Unknown operation. Try: info, viz, dfs, bfs, topo, kruskal, prim, dijkstra, bellman, all, exit." << endl;
     }
   }
 }

@@ -203,4 +203,59 @@ namespace graph {
  
     return dist;
   }
+
+  vector<i32> BellmanFord(const Graph& graph, i32 start, vector<i32>& parent, bool& has_negative_cycle)
+  {
+    i32 n = graph.size();
+    vector<i32> dist(n, INT_MAX);
+    parent.assign(n, -1);
+    has_negative_cycle = false;
+
+    if (!graph.isValidVertex(start)) {
+      return dist;
+    }
+
+    dist[start] = 0;
+
+    for (i32 step = 0; step < n - 1; step++) {
+      bool changed = false;
+
+      for (i32 from = 0; from < n; from++) {
+        if (dist[from] == INT_MAX) {
+          continue;
+        }
+
+        for (i32 to : graph.neighbors(from)) {
+          i32 weight = graph.getMatrix()[from][to];
+
+          if (dist[from] + weight < dist[to]) {
+            dist[to] = dist[from] + weight;
+            parent[to] = from;
+            changed = true;
+          }
+        }
+      }
+
+      if (!changed) {
+        break;
+      }
+    }
+
+    for (i32 from = 0; from < n; from++) {
+      if (dist[from] == INT_MAX) {
+        continue;
+      }
+
+      for (i32 to : graph.neighbors(from)) {
+        i32 weight = graph.getMatrix()[from][to];
+
+        if (dist[from] + weight < dist[to]) {
+          has_negative_cycle = true;
+          return dist;
+        }
+      }
+    }
+
+    return dist;
+  }
 }

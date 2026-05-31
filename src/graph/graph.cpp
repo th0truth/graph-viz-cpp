@@ -17,7 +17,7 @@ bool Graph::isWeighted() const
 {
   for (const auto& row : matrix) {
     for (i32 value : row) {
-      if (value > 1)
+      if (value != 0 && value != 1)
         return true;
     }
   }

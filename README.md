@@ -21,6 +21,7 @@ A compact C++17 project for working with graph representations and classic graph
 - Kruskal minimum spanning tree
 - Prim minimum spanning tree
 - Dijkstra shortest paths
+- Bellman-Ford shortest paths with negative-cycle detection
 - Graphviz `.dot` export for graph and tree visualization
 - Native SVG export with graph layout and edge-list panel
 - Optional PNG export when Graphviz is installed
@@ -89,6 +90,7 @@ topo
 kruskal
 prim
 dijkstra
+bellman
 all
 exit
 ```
@@ -97,7 +99,7 @@ exit
 
 ## Matrix Input
 
-For manual input, enter the number of vertices and then each matrix cell. Use `0` when no edge exists.
+For manual input, enter the number of vertices and then each matrix cell. Use `0` when no edge exists. Negative weights are accepted, which allows Bellman-Ford examples.
 
 Example for an undirected weighted graph with five vertices:
 
