@@ -9,4 +9,5 @@ namespace graph {
   vector<Edge> Prim(const Graph& graph, i32& total_weight);
   vector<i32> Dijkstra(const Graph& graph, i32 start, vector<i32>& parent);
   vector<i32> BellmanFord(const Graph& graph, i32 start, vector<i32>& parent, bool& has_negative_cycle);
+  vector<vector<i32>> FloydWarshall(const Graph& graph, bool& has_negative_cycle);
 }

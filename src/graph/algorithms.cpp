@@ -258,4 +258,60 @@ namespace graph {
 
     return dist;
   }
+
+  vector<vector<i32>> FloydWarshall(const Graph& graph, bool& has_negative_cycle)
+  {
+    const i32 inf = INT_MAX / 4;
+    i32 n = graph.size();
+    vector<vector<i32>> dist(n, vector<i32>(n, inf));
+    const vector<vector<i32>>& matrix = graph.getMatrix();
+    has_negative_cycle = false;
+
+    for (i32 i = 0; i < n; i++) {
+      dist[i][i] = 0;
+
+      for (i32 j = 0; j < n; j++) {
+        if (matrix[i][j] != 0) {
+          dist[i][j] = matrix[i][j];
+        }
+      }
+    }
+
+    for (i32 through = 0; through < n; through++) {
+      for (i32 from = 0; from < n; from++) {
+        if (dist[from][through] == inf) {
+          continue;
+        }
+
+        for (i32 to = 0; to < n; to++) {
+          if (dist[through][to] == inf) {
+            continue;
+          }
+
+          i32 candidate = dist[from][through] + dist[through][to];
+
+          if (candidate < dist[from][to]) {
+            dist[from][to] = candidate;
+          }
+        }
+      }
+    }
+
+    for (i32 i = 0; i < n; i++) {
+      if (dist[i][i] < 0) {
+        has_negative_cycle = true;
+        break;
+      }
+    }
+
+    for (i32 i = 0; i < n; i++) {
+      for (i32 j = 0; j < n; j++) {
+        if (dist[i][j] == inf) {
+          dist[i][j] = INT_MAX;
+        }
+      }
+    }
+
+    return dist;
+  }
 }

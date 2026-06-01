@@ -265,6 +265,31 @@ void printEdges(const vector<Edge>& edges)
   }
 }
 
+void printDistanceMatrix(const vector<vector<i32>>& dist)
+{
+  cout << setw(8) << "";
+
+  for (i32 i = 0; i < static_cast<i32>(dist.size()); i++) {
+    cout << setw(8) << i + 1;
+  }
+
+  cout << endl;
+
+  for (i32 i = 0; i < static_cast<i32>(dist.size()); i++) {
+    cout << setw(8) << i + 1;
+
+    for (i32 value : dist[i]) {
+      if (value == INT_MAX) {
+        cout << setw(8) << "INF";
+      } else {
+        cout << setw(8) << value;
+      }
+    }
+
+    cout << endl;
+  }
+}
+
 void showGraphInfo(const Graph& graph)
 {
   clearScreen();
@@ -399,6 +424,21 @@ void runBellmanFord(const Graph& graph)
   }
 }
 
+void runFloydWarshall(const Graph& graph)
+{
+  cout << endl << "Floyd-Warshall all-pairs shortest paths" << endl;
+
+  bool has_negative_cycle = false;
+  vector<vector<i32>> dist = graph::FloydWarshall(graph, has_negative_cycle);
+
+  if (has_negative_cycle) {
+    cout << "Graph contains a negative-weight cycle. Shortest paths are undefined." << endl;
+    return;
+  }
+
+  printDistanceMatrix(dist);
+}
+
 void exportVisualization(const Graph& graph)
 {
   ensureOutputDir();
@@ -433,6 +473,7 @@ void runAll(const Graph& graph)
   runPrim(graph);
   runDijkstra(graph);
   runBellmanFord(graph);
+  runFloydWarshall(graph);
 }
 
 void printOperationMenu()
@@ -448,6 +489,7 @@ void printOperationMenu()
     "prim      minimum spanning tree by Prim",
     "dijkstra  shortest paths by Dijkstra",
     "bellman   shortest paths by Bellman-Ford",
+    "floyd     all-pairs shortest paths by Floyd-Warshall",
     "all       run every operation",
     "exit      quit"
   });
@@ -485,12 +527,14 @@ void runInteractiveShell(const Graph& graph)
       runDijkstra(graph);
     } else if (command == "bellman" || command == "bellman-ford" || command == "bf") {
       runBellmanFord(graph);
+    } else if (command == "floyd" || command == "floyd-warshall" || command == "fw") {
+      runFloydWarshall(graph);
     } else if (command == "all") {
       runAll(graph);
     } else if (command == "exit" || command == "quit") {
       break;
     } else {
-      cout << "Unknown operation. Try: info, viz, dfs, bfs, topo, kruskal, prim, dijkstra, bellman, all, exit." << endl;
+      cout << "Unknown operation. Try: info, viz, dfs, bfs, topo, kruskal, prim, dijkstra, bellman, floyd, all, exit." << endl;
     }
   }
 }
